@@ -1,0 +1,59 @@
+generic = {
+  parameter = {
+    initalValue = 0.0,
+  },
+
+  init = function(self)
+    block.setInputsPinCount(1)
+    block.setOutputsPinCount(1)
+    block.modifyFlags('SampleRateGate', true)
+    block.modifyFlags('SupressStopFunctionCall', true)
+  end,
+
+  open = function(self)
+    gui.add('Info', 'Info', 'Up-sample', [[
+Resample input at higher rate by holding previus value
+]])
+    gui.add('Edit', 'EditInitalValue', 'Inital value')
+    gui.set('EditInitalValue', 'Number', self.parameter.initalValue)
+    gui.setSize()
+  end,
+
+  apply = function(self)
+    self.parameter.initalValue = gui.get('EditInitalValue', 'Number')
+  end,
+
+  close = function()
+  end,
+
+  avatar = function(self)
+    return block.getDefaultAvatar(0x50, "'\\xE2\\x86\\x91'")
+  end,
+
+  generate = function(self)
+    local source =
+      [==[
+        local block = {}
+
+        block.start = function(rateIn, rateOut)
+          block.a = INITALVALUE
+        end
+
+        block.stepIn = function(a)
+          block.a = a
+        end
+
+        block.stepOut = function(a)
+          return block.a
+        end
+
+      return block
+      ]==]
+    local replaces = {
+      ['INITALVALUE'] = self.parameter.initalValue
+    }
+    return string.gsub(source, '%a+', replaces)
+  end,
+
+}
+
